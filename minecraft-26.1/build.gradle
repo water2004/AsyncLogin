@@ -1,0 +1,71 @@
+plugins {
+    id 'net.fabricmc.fabric-loom'
+    id 'maven-publish'
+}
+
+version = "${rootProject.property('mod_version')}+mc26.1"
+
+base {
+    archivesName = "${rootProject.property('archives_base_name')}-mc26.1"
+}
+
+dependencies {
+    minecraft 'com.mojang:minecraft:26.1'
+    implementation "net.fabricmc:fabric-loader:${rootProject.property('loader_version')}"
+    implementation project(':core')
+}
+
+loom {
+    serverOnlyMinecraftJar()
+
+    runs {
+        server {
+            vmArg '-Dasynclogin.verifyMixins=true'
+        }
+    }
+
+    mods {
+        asynclogin {
+            sourceSet sourceSets.main
+        }
+    }
+}
+
+processResources {
+    inputs.property 'version', project.version
+    filesMatching('fabric.mod.json') {
+        expand version: project.version
+    }
+}
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(25)
+    withSourcesJar()
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = 25
+}
+
+jar {
+    archiveFileName = "${rootProject.property('archives_base_name')}-${project.version}.jar"
+    from project(':core').sourceSets.main.output
+    from(rootProject.file('LICENSE.txt')) {
+        rename { "LICENSE_${rootProject.property('archives_base_name')}" }
+    }
+}
+
+sourcesJar {
+    archiveFileName = "${rootProject.property('archives_base_name')}-${project.version}-sources.jar"
+    from project(':core').sourceSets.main.allSource
+}
+
+publishing {
+    publications {
+        create('mavenJava', MavenPublication) {
+            artifactId = "${rootProject.property('archives_base_name')}-mc26.1"
+            from components.java
+        }
+    }
+}

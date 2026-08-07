@@ -1,0 +1,13 @@
+plugins {
+    id 'base'
+    id 'net.fabricmc.fabric-loom' version '1.17.19' apply false
+}
+
+allprojects {
+    group = providers.gradleProperty('maven_group').get()
+    version = providers.gradleProperty('mod_version').get()
+}
+
+tasks.named('build') {
+    dependsOn ':core:build', ':minecraft-26.1:build', ':minecraft-26.2:build'
+}
