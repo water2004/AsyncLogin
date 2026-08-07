@@ -2,6 +2,8 @@
 
 [English](#english) | 简体中文
 
+[![CI and Release](https://github.com/water2004/AsyncLogin/actions/workflows/ci-release.yml/badge.svg)](https://github.com/water2004/AsyncLogin/actions/workflows/ci-release.yml)
+
 AsyncLogin 是一个服务端 Fabric 模组，将玩家登录/退出过程中涉及的玩家 DAT 和
 `usercache.json` 文件 IO 移出 Minecraft 服务端 tick 线程，避免慢磁盘或数据修复
 阻塞游戏刻。
@@ -68,6 +70,30 @@ AsyncLogin 保留 Mojang 原版的登录状态机和调用次数：
 
 - `minecraft-26.1/build/libs/AsyncLogin-1.0.0+mc26.1.jar`
 - `minecraft-26.2/build/libs/AsyncLogin-1.0.0+mc26.2.jar`
+
+## 自动构建与发布
+
+`main` 的 push、面向 `main` 的 Pull Request 以及手动运行都会执行 Java 25
+全量构建和 core 测试。构建生成的两个非 sources JAR 会作为 GitHub Actions
+Artifact 保留 14 天。
+
+发布正式版本时，在需要发布的 `main` 提交上创建并推送对应 tag：
+
+```powershell
+git tag "v1.0.0+mc26.1"
+git push origin "v1.0.0+mc26.1"
+```
+
+或：
+
+```powershell
+git tag "v1.0.0+mc26.2"
+git push origin "v1.0.0+mc26.2"
+```
+
+CI 会验证 tag 格式、tag 是否属于 `main`、tag 版本是否与对应模组元数据一致，
+随后创建 GitHub Release。每个 Release 只上传与 tag 中 Minecraft 版本匹配的正式
+JAR，发布说明由 [`RELEASE.md`](RELEASE.md) 生成。
 
 ## 项目结构
 
