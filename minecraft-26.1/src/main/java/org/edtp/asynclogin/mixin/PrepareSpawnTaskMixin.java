@@ -8,6 +8,7 @@ import net.minecraft.server.network.config.PrepareSpawnTask;
 import net.minecraft.server.players.NameAndId;
 import org.edtp.asynclogin.platform.AsyncPrepareSpawnTask;
 import org.edtp.asynclogin.platform.PlayerDataLoadContext;
+import org.edtp.asynclogin.platform.PlayerLoginDataLoadContext;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -23,10 +24,11 @@ abstract class PrepareSpawnTaskMixin implements AsyncPrepareSpawnTask {
     @Shadow @Final private NameAndId nameAndId;
 
     @Unique private CompletableFuture<PlayerDataLoadContext.Result> asynclogin$initialLoad;
-    @Unique private CompletableFuture<PlayerDataLoadContext.Result> asynclogin$finalLoad;
+    @Unique private CompletableFuture<PlayerLoginDataLoadContext.Result> asynclogin$finalLoad;
     @Unique private Consumer<Packet<?>> asynclogin$startConsumer;
     @Unique private boolean asynclogin$replayingStart;
     @Unique private boolean asynclogin$initialLoadApplied;
+    @Unique private boolean asynclogin$entitiesReady;
 
     @Inject(method = "start", at = @At("HEAD"), cancellable = true)
     private void asynclogin$queueInitialPlayerDataLoad(Consumer<Packet<?>> connection, CallbackInfo ci) {
@@ -76,12 +78,22 @@ abstract class PrepareSpawnTaskMixin implements AsyncPrepareSpawnTask {
     }
 
     @Override
-    public CompletableFuture<PlayerDataLoadContext.Result> asynclogin$beginFinalPlayerDataLoad() {
+    public CompletableFuture<PlayerLoginDataLoadContext.Result> asynclogin$beginFinalPlayerDataLoad() {
         if (this.asynclogin$finalLoad == null) {
-            this.asynclogin$finalLoad = PlayerDataLoadContext.submit(
-                this.server.getPlayerList(), this.nameAndId, "finish configuration"
+            this.asynclogin$finalLoad = PlayerLoginDataLoadContext.submit(
+                this.server, this.server.getPlayerList(), this.nameAndId
             );
         }
         return this.asynclogin$finalLoad;
+    }
+
+    @Override
+    public boolean asynclogin$areEntitiesReady() {
+        return this.asynclogin$entitiesReady;
+    }
+
+    @Override
+    public void asynclogin$setEntitiesReady(boolean ready) {
+        this.asynclogin$entitiesReady = ready;
     }
 }

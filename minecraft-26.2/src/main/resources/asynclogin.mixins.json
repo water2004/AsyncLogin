@@ -5,10 +5,15 @@
   "mixins": [
     "CachedUserNameToIdResolverMixin",
     "MinecraftServerMixin",
+    "PlayerAdvancementsMixin",
     "PlayerDataStorageMixin",
     "PlayerListMixin",
+    "PrepareSpawnReadyMixin",
     "PrepareSpawnTaskMixin",
-    "ServerConfigurationPacketListenerMixin"
+    "ServerCommonPacketListenerAccessor",
+    "ServerConfigurationPacketListenerMixin",
+    "ServerLevelAccessor",
+    "ServerStatsCounterMixin"
   ],
   "injectors": {
     "defaultRequire": 1
